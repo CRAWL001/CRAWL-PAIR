@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRAWL-MD</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url("https://telegra.ph/file/4cf337052c09eec06f3e8.jpg"); /* Set the background image */
+      background-repeat: repeat;
+      background-position: center;
+      background-size: 500px ;
+      font-family: Arial, sans-serif;
+    }
+
+    @keyframes changeBackgroundColor {
+      0% { background-color: #1f2021; }
+      100% { background-color: #000000; }
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .box {
+      width: 300px;
+      height: 380px;
+      padding: 20px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 2px solid #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.7);
+      transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    #text {
+      color: #ffffff;
+    }
+
+    .input-container {
+      display: flex;
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 0.3rem;
+      gap: 0.3rem;
+      max-width: 300px;
+      width: 100%;
+    }
+
+    .input-container input {
+      border-radius: 0.8rem 0 0 0.8rem;
+      background: #000000;
+      width: 89%;
+      flex-basis: 75%;
+      padding: 1rem;
+      border: none;
+      border-left: 2px solid #075e54;
+      color: #ecf0f1;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .input-container input:focus {
+      border-left: 2px solid #075e54;
+      outline: none;
+      box-shadow: inset 13px 13px 10px #075e54, inset -13px -13px 10px #2c3e50;
+    }
+
+    .input-container button {
+      flex-basis: 25%;
+      padding: 1rem;
+      background: #32CD32;
+      font-weight: 900;
+      letter-spacing: 0.3rem;
+      text-transform: uppercase;
+      color: white;
+      border: none;
+      width: 100%;
+      border-radius: 0 1rem 1rem 0;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .input-container button:hover {
+      background: #2980b9;
+    }
+
+    #waiting-message {
+      color: #ffffff;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .input-container {
+        flex-direction: column;
+      }
+
+      .input-container input,
+      .input-container button {
+        border-radius: 0.8rem;
+      }
+    }
+
+    .centered-text {
+      text-align: center;
+      color: #ffffff;
+    }
+
+    #loading-spinner {
+      display: none;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .fa-spinner {
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Animation for the appearing code */
+    @keyframes appearAndGrow {
+      0% {
+        opacity: 0;
+        transform: translateY(50px) scale(0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .code-animation {
+      animation: appearAndGrow 1s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box" id="box">
+      <div id="text">
+        <i class="fa fa-user"></i>
+        <h3 class="centered-text">Link with Phone Number</h3>
+        <h6>🔢 Enter your number with country code.</h6>
+        <div class="input-container">
+          <input placeholder="+94714xxxxxx" type="number" id="number">
+          <button id="submit">Submit</button>
+        </div>
+        <div id="loading-spinner">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <main id="pair"></main>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+  <script>
+    const pairElement = document.getElementById("pair");
+    const submitButton = document.getElementById("submit");
+    const numberInput = document.getElementById("number");
+    const box = document.getElementById("box");
+
+    async function copyToClipboard() {
+      const text = document.getElementById("copy").innerText.replace('CODE: ', '');
+      await navigator.clipboard.writeText(text);
+      document.getElementById("copy").innerText = "✔️ COPIED";
+      setTimeout(() => {
+        document.getElementById("copy").innerText = `CODE: ${text}`;
+      }, 500);
+    }
+
+    submitButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+      box.style.backgroundColor = "#000000"; // Change box color to dark green
+      box.style.boxShadow = "0 0 40px rgba(0, 100, 0, 0.7)"; // Change box shadow to dark green
+      if (!numberInput.value) {
+        pairElement.innerHTML = '<span style="color:red;font-weight:bold">❗Enter your WhatsApp number with country code.</span>';
+      } else if (numberInput.value.replace(/[^0-9]/g, "").length < 11) {
+        pairElement.innerHTML = '<span style="color:red;font-weight:bold">❗Invalid number format. Please try again.</span>';
+      } else {
+        const number = numberInput.value.replace(/[^0-9]/g, "");
+        numberInput.type = "text";
+        numberInput.value = `+${number}`;
+        numberInput.style.color = "white";
+        numberInput.style.fontSize = "20px";
+
+        document.getElementById("loading-spinner").style.display = "block";
+        pairElement.innerHTML = '';
+
+        try {
+          const { data } = await axios.get(`/code?number=${number}`);
+          const code = data.code || "❗ Service Unavailable";
+          pairElement.innerHTML = `<font id="copy" onclick="copyToClipboard()" style="color:green;font-weight:monospace; display: block; margin-top: 30px;" size="5">CODE: <span style="color:white;font-weight:bold">${code}</span></font>`;
+          pairElement.classList.add('code-animation'); // Add animation class
+        } catch (error) {
+          pairElement.innerHTML = '<span style="color:red;font-weight:bold">❗ Error retrieving code. Please try again later.</span>';
+        } finally {
+          document.getElementById("loading-spinner").style.display = "none";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
